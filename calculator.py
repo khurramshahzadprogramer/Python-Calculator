@@ -7,7 +7,7 @@ class CalculatorApp:
         self.root.title("Calculator")
         self.root.geometry("400x580")
         self.root.minsize(320, 480)
-        self.root.configure(bg="#F0F2F5")
+        self.root.configure(bg="#F4F6F9")
 
         # Calculator state
         self.current_input = "0"
@@ -40,11 +40,7 @@ class CalculatorApp:
         for j in range(4):
             self.card.columnconfigure(j, weight=1)
 
-        # Display Frame
-        self.display_frame = tk.Frame(self.card, bg="#F8FAFC", bd=0)
-        self.display_frame.grid(row=0, column=0, columnspan=4, sticky="nsew", padx=12, pady=12)
-        
-        # Add subtle border/outline to display frame
+        # Display Border & Inner Frame
         self.display_border = tk.Frame(self.card, bg="#E2E8F0", bd=0)
         self.display_border.grid(row=0, column=0, columnspan=4, sticky="nsew", padx=10, pady=10)
         
@@ -76,7 +72,6 @@ class CalculatorApp:
         self.result_label.pack(side=tk.BOTTOM, fill=tk.X, pady=(0, 10))
 
         # Button definitions: (text, row, col, rowspan, colspan, type)
-        # Types: 'num', 'op', 'clear', 'eq'
         buttons_layout = [
             ("C", 1, 0, 1, 2, "clear"),
             ("/", 1, 2, 1, 1, "op"),
@@ -104,38 +99,37 @@ class CalculatorApp:
         self.buttons = {}
         for (text, r, c, rs, cs, btype) in buttons_layout:
             btn = self.create_button(text, btype, lambda t=text: self.on_button_click(t))
-            btn.grid(row=r, column=c, rowspan=rs, columnspan=cs, sticky="nsew", padx=5, pady=5)
+            btn.grid(row=r, column=c, rowspan=rs, columnspan=cs, sticky="nsew", padx=6, pady=6)
             self.buttons[text] = btn
 
     def create_button(self, text, btype, command):
-        # Color schemes based on button type
+        # Soft, pleasant, and colorful pastel theme palettes
         if btype == "num":
-            bg = "#F1F5F9"
+            bg = "#F8FAFC"
             hover_bg = "#E2E8F0"
-            fg = "#0F172A"
+            fg = "#334155"
             font_to_use = self.btn_font
         elif btype == "op":
-            bg = "#EEF2FF"
-            hover_bg = "#E0E7FF"
-            fg = "#4F46E5"
+            bg = "#E0F2FE"  # Soft sky blue
+            hover_bg = "#BAE6FD"
+            fg = "#0369A1"
             font_to_use = self.btn_font
         elif btype == "eq":
-            bg = "#4F46E5"
-            hover_bg = "#4338CA"
+            bg = "#10B981"  # Vibrant pastel mint/emerald green for equals
+            hover_bg = "#059669"
             fg = "#FFFFFF"
             font_to_use = self.btn_font
         elif btype == "clear":
-            bg = "#FEF2F2"
-            hover_bg = "#FEE2E2"
-            fg = "#DC2626"
+            bg = "#FFE4E6"  # Soft pastel pink/coral
+            hover_bg = "#FECDD3"
+            fg = "#E11D48"
             font_to_use = self.clear_font
         else:
-            bg = "#F1F5F9"
+            bg = "#F8FAFC"
             hover_bg = "#E2E8F0"
-            fg = "#0F172A"
+            fg = "#334155"
             font_to_use = self.btn_font
 
-        # Create button using tk.Button with flat relief for modern look
         btn = tk.Button(
             self.card,
             text=text,
@@ -208,7 +202,7 @@ class CalculatorApp:
                 if self.current_input == "0":
                     self.current_input = char
                 else:
-                    if len(self.current_input) < 14:  # Prevent excessive length
+                    if len(self.current_input) < 14:
                         self.current_input += char
             self.update_display()
 
@@ -232,7 +226,6 @@ class CalculatorApp:
             self.operator = char
             self.reset_screen = True
             
-            # Format display value for history
             prev_str = self.format_number(self.previous_value)
             self.history_text = f"{prev_str} {self.operator}"
             self.history_label.config(text=self.history_text)
@@ -258,7 +251,7 @@ class CalculatorApp:
                 result = self.previous_value * current_value
             elif self.operator == "/":
                 if current_value == 0:
-                    self.show_error("Division by zero")
+                    self.show_for_error("Division by zero")
                     return
                 result = self.previous_value / current_value
 
@@ -271,22 +264,20 @@ class CalculatorApp:
                 self.previous_value = None
 
         except ZeroDivisionError:
-            self.show_error("Division by zero")
+            self.show_for_error("Division by zero")
         except Exception:
-            self.show_error("Error")
+            self.show_for_error("Error")
 
     def format_number(self, num):
         if num is None:
             return "0"
-        # Check if integer
         if num == int(num) and not (isinstance(num, float) and abs(num) > 1e15):
             val_str = str(int(num))
         else:
-            val_str = f"{num:.10g}"  # Up to 10 significant digits, avoids floating inaccuracies
+            val_str = f"{num:.10g}"
         return val_str
 
     def update_display(self):
-        # Format display string with length check
         display_str = self.current_input
         if len(display_str) > 12:
             try:
@@ -296,9 +287,9 @@ class CalculatorApp:
                 display_str = display_str[:12]
         self.result_label.config(text=display_str)
 
-    def show_error(self, message):
+    def show_for_error(self, message):
         self.error_state = True
-        self.result_label.config(text=message, fg="#DC2626")
+        self.result_label.config(text=message, fg="#E11D48")
         self.history_label.config(text="")
 
     def clear_all(self):
