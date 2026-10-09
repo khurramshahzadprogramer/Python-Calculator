@@ -8,7 +8,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Custom CSS for UI/UX replication & responsiveness
+# Custom CSS for polished mobile calculator UI/UX
 st.markdown("""
 <style>
     /* App background */
@@ -18,7 +18,7 @@ st.markdown("""
     
     /* Center container max width */
     .block-container {
-        max-width: 440px;
+        max-width: 400px;
         padding-top: 2rem;
         padding-bottom: 2rem;
     }
@@ -26,17 +26,17 @@ st.markdown("""
     /* Calculator card container */
     .calc-card {
         background-color: #FFFFFF;
-        border-radius: 16px;
+        border-radius: 20px;
         padding: 24px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
     }
 
     /* Display box */
     .calc-display {
         background-color: #F8FAFC;
         border: 1px solid #E2E8F0;
-        border-radius: 8px;
-        padding: 12px 16px;
+        border-radius: 12px;
+        padding: 14px 18px;
         text-align: right;
         margin-bottom: 20px;
     }
@@ -45,13 +45,13 @@ st.markdown("""
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         font-size: 14px;
         color: #64748B;
-        min-height: 20px;
+        min-height: 22px;
         word-break: break-all;
     }
 
     .calc-result {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        font-size: 32px;
+        font-size: 34px;
         font-weight: bold;
         color: #1E293B;
         word-break: break-all;
@@ -59,18 +59,25 @@ st.markdown("""
 
     .calc-error {
         color: #E11D48 !important;
+        font-size: 26px !important;
     }
 
     /* Base button styling */
     div.stButton > button {
         width: 100%;
-        border-radius: 8px;
+        border-radius: 12px;
         font-size: 18px;
         font-weight: bold;
-        height: 52px;
+        height: 56px;
         border: none;
-        box-shadow: none;
-        transition: background-color 0.15s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+        transition: all 0.15s ease;
+        cursor: pointer;
+    }
+    
+    div.stButton > button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -116,6 +123,16 @@ def clear_all():
     st.session_state.history_text = ""
     st.session_state.error_state = False
 
+def backspace():
+    if st.session_state.error_state:
+        return
+    if st.session_state.reset_screen:
+        return
+    if len(st.session_state.current_input) > 1:
+        st.session_state.current_input = st.session_state.current_input[:-1]
+    else:
+        st.session_state.current_input = "0"
+
 def calculate(intermediate=False):
     try:
         current_value = float(st.session_state.current_input)
@@ -153,6 +170,10 @@ def show_for_error(message):
 def on_button_click(char):
     if char == "C":
         clear_all()
+        return
+
+    if char == "⌫":
+        backspace()
         return
 
     if st.session_state.error_state:
@@ -213,7 +234,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# Button grid definition
+# Button grid definition using harmonized column layouts (Row widths sum = 4)
 # Row 1: C (span 2), /, *
 r1_c1, r1_c2, r1_c3 = st.columns([2, 1, 1])
 with r1_c1:
@@ -286,7 +307,7 @@ with r4_c4:
         on_button_click("=")
         st.rerun()
 
-# Row 5: 0 (span 2), .
+# Row 5: 0 (span 2), ., ⌫ (backspace)
 r5_c1, r5_c2, r5_c3 = st.columns([2, 1, 1])
 with r5_c1:
     if st.button("0", key="btn_0", use_container_width=True):
@@ -297,7 +318,8 @@ with r5_c2:
         on_button_click(".")
         st.rerun()
 with r5_c3:
-    # Empty placeholder to align grid correctly
-    st.markdown("")
+    if st.button("⌫", key="btn_back", use_container_width=True):
+        on_button_click("⌫")
+        st.rerun()
 
 st.markdown('</div>', unsafe_allow_html=True)
